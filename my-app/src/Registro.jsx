@@ -1,0 +1,124 @@
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import "./styles/CssRegistro.css";
+import "./styles/main.css";
+
+export default function Registro() {
+  const navigate = useNavigate();
+
+  const [nombre, setNombre] = useState("");
+  const [email, setEmail] = useState("");
+  const [contraseña, setContraseña] = useState("");
+  const [confirmarContraseña, setConfirmarContraseña] = useState("");
+  const [telefono, setTelefono] = useState("");
+  const [region, setRegion] = useState("");
+  const [comuna, setComuna] = useState("");
+
+  const [nombreError, setNombreError] = useState("");
+  const [emailError, setEmailError] = useState("");
+  const [contraseñaError, setContraseñaError] = useState("");
+  const [confirmarContraseñaError, setConfirmarContraseñaError] = useState("");
+  const [registroExitoso, setRegistroExitoso] = useState("");
+
+ const handleSubmit = async (event) => {
+  event.preventDefault();
+
+  setNombreError(""); 
+  setEmailError(""); 
+  setContraseñaError(""); 
+  setConfirmarContraseñaError(""); 
+  setRegistroExitoso("");
+
+  if (!nombre) { setNombreError("Nombre requerido"); return; }
+  if (!email) { setEmailError("Correo requerido"); return; }
+  if (!contraseña) { setContraseñaError("Contraseña requerida"); return; }
+  if (contraseña !== confirmarContraseña) {
+    setConfirmarContraseñaError("Las contraseñas no coinciden");
+    return;
+  }
+
+  const nuevoUsuario = {
+    nombre,
+    email,
+    contrasena: contraseña,
+    telefono,
+    region,
+    comuna
+  };
+
+  try {
+    const response = await fetch("http://localhost:8080/api/usuarios", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(nuevoUsuario)
+    });
+
+    if (!response.ok) {
+      throw new Error("Error registrando usuario");
+    }
+
+    setRegistroExitoso("Usuario registrado correctamente. Redirigiendo...");
+
+    setTimeout(() => navigate("/inicio-sesion"), 1000);
+    
+    setNombre("");
+    setEmail("");
+    setContraseña("");
+    setConfirmarContraseña("");
+    setTelefono("");
+    setRegion("");
+    setComuna("");
+
+   } catch (error) {
+    setEmailError("Error al registrar el usuario. Intenta nuevamente.");
+    }
+  };
+
+  return (
+    <main className="img-fondo">
+      <div className="login-box">
+        <div>
+          <img src="/images/Logo_de_GameCloud.png" alt="Logo de GameCloud" />
+        </div>
+        <h2>Registrarse</h2>
+        <form onSubmit={handleSubmit}>
+          <div className="form-group">
+            <label htmlFor="nombre">Nombre Completo</label>
+            <input id="nombre" type="text" className="form-control" value={nombre} onChange={e => setNombre(e.target.value)} />
+            {nombreError && <div className="fore-text">{nombreError}</div>}
+          </div>
+          <div className="form-group">
+            <label htmlFor="email">Correo</label>
+            <input id="email" type="email" className="form-control" value={email} onChange={e => setEmail(e.target.value)} />
+            {emailError && <div className="fore-text">{emailError}</div>}
+          </div>
+          <div className="form-group">
+            <label htmlFor="contraseña">Contraseña</label>
+            <input id="contraseña" type="password" className="form-control" value={contraseña} onChange={e => setContraseña(e.target.value)} />
+            {contraseñaError && <div className="fore-text">{contraseñaError}</div>}
+          </div>
+          <div className="form-group">
+            <label htmlFor="confirmarContraseña">Confirmar Contraseña</label>
+            <input id="confirmarContraseña" type="password" className="form-control" value={confirmarContraseña} onChange={e => setConfirmarContraseña(e.target.value)} />
+            {confirmarContraseñaError && <div className="fore-text">{confirmarContraseñaError}</div>}
+          </div>
+          <div className="form-group">
+            <label htmlFor="telefono">Teléfono</label>
+            <input id="telefono" type="text" className="form-control" value={telefono} onChange={e => setTelefono(e.target.value)} />
+          </div>
+          <div className="form-group">
+            <label htmlFor="region">Región</label>
+            <input id="region" type="text" className="form-control" value={region} onChange={e => setRegion(e.target.value)} />
+          </div>
+          <div className="form-group">
+            <label htmlFor="comuna">Comuna</label>
+            <input id="comuna" type="text" className="form-control" value={comuna} onChange={e => setComuna(e.target.value)} />
+          </div>
+          <button type="submit" className="btn btn-primary">Registrarse</button>
+          {registroExitoso && <div className="success-text">{registroExitoso}</div>}
+        </form>
+      </div>
+    </main>
+  );
+}
+
