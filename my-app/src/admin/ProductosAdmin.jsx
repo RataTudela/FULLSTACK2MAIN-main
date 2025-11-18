@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
 
-const toBase64 = (file) =>
+const toBase64 = (archivo) =>
   new Promise((resolve, reject) => {
     const reader = new FileReader();
-    reader.readAsDataURL(file);
+    reader.readAsDataURL(archivo);
     reader.onload = () => resolve(reader.result);
     reader.onerror = (error) => reject(error);
   });
@@ -19,12 +19,12 @@ export default function ProductosAdmin() {
   const [selected, setSelected] = useState(null);
 
   const [form, setForm] = useState({
-    title: "",
-    description: "",
-    price: "",
-    image: "",
+    titulo: "",
+    descripcion: "",
+    precio: "",
+    imagen: "",
     qty: 0,
-    category: "",
+    categoria: "",
   });
 
   async function cargarProductos() {
@@ -45,7 +45,14 @@ export default function ProductosAdmin() {
   }, []);
 
   const resetForm = () =>
-    setForm({ title: "", description: "", price: "", image: "", qty: 0, category: "" });
+    setForm({
+      titulo: "",
+      descripcion: "",
+      precio: "",
+      imagen: "",
+      qty: 0,
+      categoria: "",
+    });
 
   const handleCreate = async (e) => {
     e.preventDefault();
@@ -53,7 +60,7 @@ export default function ProductosAdmin() {
     await fetch("http://localhost:8080/api/productos", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ ...form }),
+      body: JSON.stringify(form), 
     });
 
     cargarProductos();
@@ -61,15 +68,15 @@ export default function ProductosAdmin() {
     setShowCreate(false);
   };
 
-  const openEdit = (product) => {
-    setSelected(product);
+  const openEdit = (p) => {
+    setSelected(p);
     setForm({
-      title: product.title,
-      description: product.description,
-      price: product.price,
-      image: product.image,
-      qty: product.qty,
-      category: product.category, 
+      titulo: p.titulo,
+      descripcion: p.descripcion,
+      precio: p.precio,
+      imagen: p.imagen,
+      qty: p.qty,
+      categoria: p.categoria,
     });
     setShowEdit(true);
   };
@@ -105,14 +112,14 @@ export default function ProductosAdmin() {
   const totalProductos = productos.length;
   const totalStock = productos.reduce((sum, p) => sum + (p.qty || 0), 0);
   const valorInventario = productos.reduce(
-    (sum, p) => sum + p.price * (p.qty || 0),
+    (sum, p) => sum + p.precio * (p.qty || 0),
     0
   );
 
-  const handleFileChange = async (file) => {
-    if (file) {
-      const base64 = await toBase64(file);
-      setForm({ ...form, image: base64 });
+  const handleFileChange = async (archivo) => {
+    if (archivo) {
+      const base64 = await toBase64(archivo);
+      setForm({ ...form, imagen: base64 }); 
     }
   };
 
@@ -157,10 +164,10 @@ export default function ProductosAdmin() {
               productos.map((p) => (
                 <tr key={p.id}>
                   <td className="text-center">
-                    {p.image && (
+                    {p.imagen && (
                       <img
-                        src={p.image}
-                        alt={p.title}
+                        src={p.imagen}
+                        alt={p.titulo}
                         style={{
                           width: "60px",
                           height: "60px",
@@ -172,10 +179,10 @@ export default function ProductosAdmin() {
                       />
                     )}
                   </td>
-                  <td>{p.title}</td>
-                  <td>{p.description}</td>
-                  <td>{p.category || "-"}</td>
-                  <td className="text-end">${p.price.toLocaleString("es-CL")}</td>
+                  <td>{p.titulo}</td>
+                  <td>{p.descripcion}</td>
+                  <td>{p.categoria || "-"}</td>
+                  <td className="text-end">${p.precio?.toLocaleString("es-CL")}</td>
                   <td className="text-end">{p.qty || 0}</td>
                   <td className="text-end">
                     <button className="btn btn-sm btn-warning me-2" onClick={() => openEdit(p)}>
@@ -224,14 +231,14 @@ export default function ProductosAdmin() {
       )}
 
       {showCritical && (
-        <ModalSimple title="Productos Críticos" onClose={() => setShowCritical(false)}>
+        <ModalSimple title="Productos Crítticos" onClose={() => setShowCritical(false)}>
           {productosCriticos.length === 0 ? (
             <p>No hay productos críticos</p>
           ) : (
             <ul>
               {productosCriticos.map((p) => (
                 <li key={p.id}>
-                  {p.title} - Cantidad: {p.qty || 0}
+                  {p.titulo} - Cantidad: {p.qty || 0}
                 </li>
               ))}
             </ul>
@@ -248,8 +255,7 @@ export default function ProductosAdmin() {
             <strong>Stock total:</strong> {totalStock}
           </p>
           <p>
-            <strong>Valor total inventario:</strong> $
-            {valorInventario.toLocaleString("es-CL")}
+            <strong>Valor total inventario:</strong> ${valorInventario.toLocaleString("es-CL")}
           </p>
         </ModalSimple>
       )}
@@ -274,8 +280,8 @@ function ModalProducto({ title, form, setForm, categorias, onClose, onSubmit, ha
                 <label className="form-label">Título</label>
                 <input
                   className="form-control"
-                  value={form.title}
-                  onChange={(e) => setForm({ ...form, title: e.target.value })}
+                  value={form.titulo}
+                  onChange={(e) => setForm({ ...form, titulo: e.target.value })}
                   required
                 />
               </div>
@@ -284,8 +290,8 @@ function ModalProducto({ title, form, setForm, categorias, onClose, onSubmit, ha
                 <label className="form-label">Descripción</label>
                 <textarea
                   className="form-control"
-                  value={form.description}
-                  onChange={(e) => setForm({ ...form, description: e.target.value })}
+                  value={form.descripcion}
+                  onChange={(e) => setForm({ ...form, descripcion: e.target.value })}
                 />
               </div>
 
@@ -294,8 +300,8 @@ function ModalProducto({ title, form, setForm, categorias, onClose, onSubmit, ha
                 <input
                   type="number"
                   className="form-control"
-                  value={form.price}
-                  onChange={(e) => setForm({ ...form, price: e.target.value })}
+                  value={form.precio}
+                  onChange={(e) => setForm({ ...form, precio: e.target.value })}
                   required
                 />
               </div>
@@ -315,8 +321,8 @@ function ModalProducto({ title, form, setForm, categorias, onClose, onSubmit, ha
                 <label className="form-label">Categoría</label>
                 <select
                   className="form-select"
-                  value={form.category}
-                  onChange={(e) => setForm({ ...form, category: e.target.value })}
+                  value={form.categoria}
+                  onChange={(e) => setForm({ ...form, categoria: e.target.value })}
                   required
                 >
                   <option value="">Seleccione categoría</option>
@@ -336,9 +342,9 @@ function ModalProducto({ title, form, setForm, categorias, onClose, onSubmit, ha
                   accept="image/*"
                   onChange={(e) => handleFileChange(e.target.files[0])}
                 />
-                {form.image && (
+                {form.imagen && (
                   <img
-                    src={form.image}
+                    src={form.imagen}
                     alt="preview"
                     style={{
                       width: "80px",
