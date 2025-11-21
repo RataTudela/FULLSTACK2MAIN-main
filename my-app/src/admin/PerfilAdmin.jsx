@@ -10,6 +10,7 @@ export default function PerfilAdmin() {
     nueva: '',
     confirmar: ''
   });
+  
   const [error, setError] = useState('');
 
   useEffect(() => {
@@ -61,7 +62,7 @@ export default function PerfilAdmin() {
         <div className="col-md-8">
           <div className="card">
             <div className="card-header">
-              <h3 className="mb-0">Perfil</h3>
+              <h3 className="mb-0" style={{ color: "#000000" }}>Perfil</h3>
             </div>
             <div className="card-body">
               <div className="mb-3"><strong>Nombre:</strong> {usuario.nombre}</div>
