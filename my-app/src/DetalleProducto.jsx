@@ -26,6 +26,7 @@ export default function DetalleProducto() {
 
     cargarProducto();
   }, [id]);
+  
   useEffect(() => {
     const cargarTodos = async () => {
       try {
@@ -40,7 +41,7 @@ export default function DetalleProducto() {
     cargarTodos();
   }, []);
 
-  if (loading) return <h2>Cargando...</h2>;
+  if (loading) return <h2>Cargando</h2>;
 
   if (!product) {
     return (
