@@ -4,32 +4,37 @@ import "./styles/main.css";
 import "./styles/CssRegistro.css";
 import "./styles/CssProducto.css";
 
-import productosBase from "./utils/productosData";
-import categoriasBase from "./utils/categoriasData";
-
 export default function Productos() {
   const [productos, setProductos] = useState([]);
   const [categorias, setCategorias] = useState([]);
   const [categoriaSeleccionada, setCategoriaSeleccionada] = useState(null);
 
-  // Cargar productos
   useEffect(() => {
-    const rawProducts = localStorage.getItem("app_products");
-    if (rawProducts) setProductos(JSON.parse(rawProducts));
-    else {
-      setProductos(productosBase);
-      localStorage.setItem("app_products", JSON.stringify(productosBase));
-    }
+    const cargarDatos = async () => {
+      try {
+        const resProd = await fetch("http://localhost:8080/api/productos");
+        const dataProd = await resProd.json();
+        setProductos(dataProd);
+        localStorage.setItem("app_products", JSON.stringify(dataProd));
 
-    const rawCategorias = localStorage.getItem("app_categorias");
-    if (rawCategorias) setCategorias(JSON.parse(rawCategorias));
-    else {
-      setCategorias(categoriasBase);
-      localStorage.setItem("app_categorias", JSON.stringify(categoriasBase));
-    }
+        const resCat = await fetch("http://localhost:8080/api/categorias");
+        const dataCat = await resCat.json();
+        setCategorias(dataCat);
+        localStorage.setItem("app_categorias", JSON.stringify(dataCat));
+
+      } catch (err) {
+        console.error("Error cargando API, usando datos locales:", err);
+        const rawProducts = localStorage.getItem("app_products");
+        if (rawProducts) setProductos(JSON.parse(rawProducts));
+
+        const rawCategorias = localStorage.getItem("app_categorias");
+        if (rawCategorias) setCategorias(JSON.parse(rawCategorias));
+      }
+    };
+
+    cargarDatos();
   }, []);
 
-  // Agregar al carrito
   const agregar = (id) => {
     const raw = localStorage.getItem("cart");
     let c = raw ? JSON.parse(raw) : [];
@@ -42,7 +47,6 @@ export default function Productos() {
     if (cnt) cnt.textContent = c.reduce((s, i) => s + i.qty, 0);
   };
 
-  // Inicializar contador
   useEffect(() => {
     const cnt = document.getElementById("contador");
     if (cnt) {
@@ -52,13 +56,14 @@ export default function Productos() {
     }
   }, []);
 
-  // Filtrar productos según categoria
   const productosFiltrados =
     categoriaSeleccionada === null
       ? productos
       : productos.filter((p) => {
-          if (p.category) return p.category === categoriaSeleccionada.name;
+          if (p.categoria) return p.categoria === categoriaSeleccionada.nombre;
           if (p.categoriaId) return p.categoriaId === categoriaSeleccionada.id;
+          if (p.category) return p.category === categoriaSeleccionada.nombre;
+
           return false;
         });
 
@@ -77,6 +82,7 @@ export default function Productos() {
             >
               Todos
             </button>
+
             {categorias.map((cat) => (
               <button
                 key={cat.id}
@@ -87,12 +93,10 @@ export default function Productos() {
                 }`}
                 onClick={() => setCategoriaSeleccionada(cat)}
               >
-                {cat.name}
+                {cat.nombre || cat.name}
               </button>
             ))}
           </div>
-
-          {/* Productos */}
           <div className="container">
             {productosFiltrados.length === 0 ? (
               <p className="text-center mt-3">No hay productos disponibles.</p>
@@ -103,20 +107,28 @@ export default function Productos() {
                     <div className="card h-100 d-flex flex-column">
                       <Link to={`/detalle-producto/${product.id}`}>
                         <img
-                          src={product.image}
+                          src={product.imagen || product.image}
                           className="card-img-top"
-                          alt={product.title}
+                          alt={product.titulo || product.title}
                           style={{ height: 200, objectFit: "cover" }}
                         />
                       </Link>
+
                       <div className="card-body d-flex flex-column">
-                        <h5 className="card-title">{product.title}</h5>
-                        <p className="card-text">{product.description}</p>
+                        <h5 className="card-title">
+                          {product.titulo || product.title}
+                        </h5>
+
+                        <p className="card-text">
+                          {product.descripcion || product.description}
+                        </p>
+
                         <p className="mt-auto mb-2">
                           <strong>
-                            ${product.price.toLocaleString("es-CL")}
+                            ${(product.precio || product.price).toLocaleString("es-CL")}
                           </strong>
                         </p>
+
                         <button
                           type="button"
                           className="btn btn-primary btn-sm mt-2"
@@ -131,9 +143,9 @@ export default function Productos() {
               </div>
             )}
           </div>
+
         </div>
       </div>
     </div>
   );
 }
-

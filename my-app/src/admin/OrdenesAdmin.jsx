@@ -3,24 +3,19 @@ import React, { useEffect, useState } from "react";
 export default function OrdenesAdmin() {
   const [ordenes, setOrdenes] = useState([]);
 
-  const cargarOrdenes = () => {
-    const raw = localStorage.getItem("ordenes");
-    if (raw) {
-      const parsed = JSON.parse(raw);
-      setOrdenes(parsed.sort((a, b) => b.id - a.id)); 
-    } else {
+  const cargarOrdenes = async () => {
+    try {
+      const res = await fetch("http://localhost:8080/api/ordenes");
+      const data = await res.json();
+      setOrdenes(data);
+    } catch (error) {
+      console.error("Error cargando órdenes:", error);
       setOrdenes([]);
     }
   };
 
   useEffect(() => {
     cargarOrdenes();
-
-    const handleStorage = (e) => {
-      if (e.key === "ordenes") cargarOrdenes();
-    };
-    window.addEventListener("storage", handleStorage);
-    return () => window.removeEventListener("storage", handleStorage);
   }, []);
 
   return (
@@ -34,29 +29,38 @@ export default function OrdenesAdmin() {
       {ordenes.map((o) => (
         <div key={o.id} className="card mb-3">
           <div className="card-header">
-            <strong>Orden #{o.id}</strong> - {new Date(o.fecha).toLocaleString()}
+            <strong>Orden #{o.id}</strong> - {o.fecha}
           </div>
+
           <div className="card-body">
             <h5>Cliente:</h5>
             <p>
-              {o.cliente.nombre} {o.cliente.apellido} <br />
-              {o.cliente.correo} <br />
-              {o.cliente.calle} {o.cliente.departamento} <br />
-              {o.cliente.comuna}, {o.cliente.region} <br />
-              {o.cliente.indicaciones}
+              {o.nombre} {o.apellido} <br />
+              {o.correo} <br />
+              {o.calle} {o.departamento} <br />
+              {o.comuna}, {o.region} <br />
+              {o.indicaciones}
             </p>
 
             <h5>Productos:</h5>
             <ul>
-              {o.productos.map((p) => (
-                <li key={p.id}>
-                  {p.title} - {p.qty} x {p.price.toLocaleString("es-CL", { style: "currency", currency: "CLP" })}
+              {o.productos.map((p, i) => (
+                <li key={i}>
+                  {p.titulo} - {p.qty} x{" "}
+                  {p.precio.toLocaleString("es-CL", {
+                    style: "currency",
+                    currency: "CLP",
+                  })}
                 </li>
               ))}
             </ul>
 
             <h5>
-              Total: {o.total.toLocaleString("es-CL", { style: "currency", currency: "CLP" })}
+              Total:{" "}
+              {o.total.toLocaleString("es-CL", {
+                style: "currency",
+                currency: "CLP",
+              })}
             </h5>
           </div>
         </div>
@@ -64,4 +68,3 @@ export default function OrdenesAdmin() {
     </div>
   );
 }
-

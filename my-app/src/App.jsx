@@ -24,15 +24,21 @@ export default function App() {
 	const location = useLocation();
 
 	useEffect(() => {
-		document.body.classList.remove('route-registro');
-		document.body.classList.remove('route-inicio-sesion');
+    document.body.classList.remove("route-registro");
+    document.body.classList.remove("route-inicio-sesion");
+    document.body.classList.remove("route-detalle-producto");
 
-		if (location.pathname === '/Registro') {
-			document.body.classList.add('route-registro');
-		} else if (location.pathname === '/inicio-sesion') {
-			document.body.classList.add('route-inicio-sesion');
-		}
+    if (location.pathname === "/Registro") {
+        document.body.classList.add("route-registro");
+    } 
+    else if (location.pathname === "/inicio-sesion") {
+        document.body.classList.add("route-inicio-sesion");
+    } 
+    else if (location.pathname.startsWith("/detalle-producto")) {
+        document.body.classList.add("route-detalle-producto");
+    }
 	}, [location]);
+
 
 	return (
 		<Routes>
@@ -42,8 +48,7 @@ export default function App() {
 			<Route path="/blog" element={<MainLayout><Blog /></MainLayout>} />
 			<Route path="/productos" element={<MainLayout><Productos /></MainLayout>} />
 			<Route path="/carrito" element={<MainLayout><Carrito /></MainLayout>} />
-			<Route path="/detalle-producto" element={<MainLayout><DetalleProducto /></MainLayout>} />
-			<Route path="/detalle-producto/:index" element={<MainLayout><DetalleProducto /></MainLayout>} />
+			<Route path="/detalle-producto/:id" element={<MainLayout><DetalleProducto /></MainLayout>} />
 			<Route path="/noticia1" element={<MainLayout><Noticia1 /></MainLayout>} />
 			<Route path="/noticia2" element={<MainLayout><Noticia2 /></MainLayout>} />
 			<Route path="/Registro" element={<MainLayout><Registro /></MainLayout>} />

@@ -1,33 +1,55 @@
 import React, { useEffect, useState } from "react";
-import reportesData from "../utils/reportesData"; 
 
 export default function Reportes() {
     const [contactos, setContactos] = useState([]);
+    const [loading, setLoading] = useState(true);
+
+    const cargarReportes = async () => {
+        try {
+            const res = await fetch("http://localhost:8080/api/reportes");
+            const data = await res.json();
+            const ordenados = data.sort(
+                (a, b) => new Date(b.fecha) - new Date(a.fecha)
+            );
+
+            setContactos(ordenados);
+        } catch (err) {
+            console.error("Error cargando reportes:", err);
+        } finally {
+            setLoading(false);
+        }
+    };
 
     useEffect(() => {
-  
-        const raw = localStorage.getItem("contactos");
-        let contactosLS = raw ? JSON.parse(raw) : [];
-        const todosContactos = [...reportesData, ...contactosLS];
-        setContactos(todosContactos.sort((a, b) => new Date(b.fecha) - new Date(a.fecha)));
+        cargarReportes();
     }, []);
-
     return (
         <div className="container my-4">
             <h2>Reportes de Contacto</h2>
-            {contactos.length === 0 && <div>No hay mensajes enviados.</div>}
-
-            {contactos.map((c, i) => (
-                <div key={i} className="card mb-3">
-                    <div className="card-header">
-                        {c.nombre} - {c.email}
-                    </div>
-                    <div className="card-body">
-                        <p>{c.texto}</p>
-                        <small>Enviado el: {new Date(c.fecha).toLocaleString()}</small>
-                    </div>
+            {loading && (
+                <div className="alert alert-info">
+                    Cargando mensajes
                 </div>
-            ))}
+            )}
+            {!loading && contactos.length === 0 && (
+                <div className="alert alert-warning">
+                    No hay mensajes enviados.
+                </div>
+            )}
+            {!loading &&
+                contactos.map((c) => (
+                    <div key={c.id} className="card mb-3 shadow-sm">
+                        <div className="card-header">
+                            <strong>{c.nombre}</strong> — {c.email}
+                        </div>
+                        <div className="card-body">
+                            <p>{c.texto}</p>
+                            <small className="text-muted">
+                                Enviado el: {new Date(c.fecha).toLocaleString()}
+                            </small>
+                        </div>
+                    </div>
+                ))}
         </div>
     );
 }
